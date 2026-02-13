@@ -34,3 +34,6 @@ Build:
 ```bash
 npm run build
 ```
+
+## Live Demo
+https://movie-app-sigma-ruby-58.vercel.app
