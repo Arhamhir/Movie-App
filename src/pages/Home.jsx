@@ -1,0 +1,80 @@
+import { useState, useEffect } from "react";
+import Movie from "../components/Movie";
+import "../css/Home.css";
+import { getPopularMovies, searchMovies } from "../services/api";
+
+const Home = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [movies, setMovies] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadPopularMovies = async () => {
+      try {
+        const popularMovies = await getPopularMovies();
+        setMovies(popularMovies);
+      } catch (err) {
+        console.log(err);
+        setError("Failed to load...");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadPopularMovies();
+  }, []);
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    setLoading(true);
+    if (loading) return;
+
+    try {
+      const searchResult = await searchMovies(searchQuery);
+      setMovies(searchResult);
+      setError(null);
+    } catch (err) {
+      setError("Failed to search the movie");
+    } finally {
+      setLoading(false);
+    }
+
+    setSearchQuery("");
+  };
+
+  return (
+    <div className="home">
+      <form onSubmit={handleSearch} className="search-form">
+        <input
+          type="text"
+          placeholder="Search Movie..."
+          className="search-input"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <button type="submit" className="search-button">
+          Search
+        </button>
+      </form>
+
+      {error && <div className="error-message">{error}</div>}
+
+      {loading ? (
+        <div className="loading">Loading...</div>
+      ) : (
+        <div className="movies-grid">
+          {movies.length === 0 ? (
+            <div className="no-results">No results found.</div>
+          ) : null}
+          {movies.map((movie) => (
+            <Movie movie={movie} key={movie.id}></Movie>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Home;
